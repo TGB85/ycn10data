@@ -1,7 +1,5 @@
 from flask import Flask
-
 from Julio import julio
-
 from endpoint_erik import leuke_functie
 import endpointtamara
 
@@ -19,7 +17,7 @@ def julioFunctie():
 
 @app.route("/erik")
 def endpoint_erik():
-    return leuke_functie
+    return leuke_functie()
 
 @app.route("/helloworld2")
 def hello_world2():
