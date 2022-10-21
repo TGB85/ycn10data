@@ -14,7 +14,7 @@ def hello_world():
 
 
 @app.route("/julioTest1")
-def julio():
+def julioFunctie():
     return julio()
 
 @app.route("/erik")
