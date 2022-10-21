@@ -1,6 +1,6 @@
 from flask import Flask
 
-from julio import julio
+from Julio import julio
 
 from endpoint_erik import leuke_functie
 import endpointtamara
