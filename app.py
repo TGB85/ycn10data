@@ -7,5 +7,5 @@ def hello_world():
     return "<p>Hello, World!</p>"
 
 @app.route("/julioTest1")
-def julio():
+def julioFunctie():
     return julio()
