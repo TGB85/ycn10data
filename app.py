@@ -1,12 +1,21 @@
 from flask import Flask
+
+from julio import julio
+
 from endpoint_erik import leuke_functie
 import endpointtamara
+
 
 app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
+
+
+@app.route("/julioTest1")
+def julio():
+    return julio()
 
 @app.route("/erik")
 def endpoint_erik():
@@ -23,4 +32,5 @@ def hello_world3():
 @app.route("/endpointtamara")
 def functie2():
     return endpointtamara.function_tamara()
+
 
