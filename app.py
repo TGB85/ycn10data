@@ -2,7 +2,7 @@ from flask import Flask
 from Julio import julio
 from endpoint_erik import leuke_functie
 import endpointtamara
-
+import felixbestand
 
 app = Flask(__name__)
 
@@ -30,5 +30,13 @@ def hello_world3():
 @app.route("/endpointtamara")
 def functie2():
     return endpointtamara.function_tamara()
+
+
+
+@app.route("/checkfelix")
+def functiefelix1():
+
+    return felixbestand.vanmij()
+
 
 
