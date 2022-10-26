@@ -3,6 +3,7 @@ from Julio import julio
 from endpoint_erik import leuke_functie
 import endpointtamara
 import felixbestand
+from flask import request
 
 app = Flask(__name__)
 
@@ -35,8 +36,11 @@ def functie2():
 
 @app.route("/checkfelix")
 def functiefelix1():
+    return felixbestand.vanmij5()
 
-    return felixbestand.vanmij()
+@app.route("/checkfelix2", methods = ['GET', 'POST'])
+def functiefelix2():
+    return felixbestand.nogeen(request)
 
 
 
