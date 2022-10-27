@@ -24,13 +24,14 @@ def endpoint_erik():
 def hello_world2():
     return "<p>Hello, World nummer 2!</p>"
 
-@app.route("/helloworld3")
-def hello_world3():
-    return "<p>Hello, World nummer 3!</p>"
+@app.route("/endpointtamara/posters")
+def posters():
+    return endpointtamara.three_posters()
 
-@app.route("/endpointtamara")
-def functie2():
-    return endpointtamara.function_tamara()
+@app.route("/endpointtamara/<int:genre_id>")
+def movies(genre_id):
+    print(f"genre_id = {genre_id}")
+    return endpointtamara.three_movies_per_genre(genre_id)
 
 
 

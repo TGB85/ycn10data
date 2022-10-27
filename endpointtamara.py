@@ -28,15 +28,22 @@ def query_sql(query_text):
     query = get_connection().execute(text(query_text))
     return pd.DataFrame(query.fetchall())
 
-def function_tamara(genre_id=0):
-
+def three_movies_per_genre(genre_id=0):
     query_test = make_query(genre_id)
     data = query_sql(query_test)
     selection = data.sample(n=3)
-    # result = json.dumps(list(data.tconst[:3]))
-    # result = json.dumps(data.tconst[:3].to_dict())
     result = json.dumps(selection.tconst.to_dict())
     return result
+
+def three_posters():
+    query_text = '''
+        SELECT poster 
+        FROM from_api;
+        '''
+    data = query_sql(query_text)
+    selection = data.sample(n=3)
+    posters = [item for item in selection.poster]
+    return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
 
 # df = pd.read_sql_query('''SELECT * FROM genres''', con=engine)
 # print(df.head())
@@ -48,6 +55,7 @@ if __name__ == '__main__':
     except Exception as er_msg:
         print("Connection failed due to error: \n", er_msg)
     
-    print(function_tamara(genre_id=1))
+    print(three_movies_per_genre(genre_id=1))
+    print(three_posters())
 
 
