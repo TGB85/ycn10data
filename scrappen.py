@@ -4,6 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from decimal import Decimal
 import mysql.connector 
+import pandas as pd
 
 dbverbinding = mysql.connector.connect(
     host='localhost',
@@ -20,7 +21,8 @@ def return_database():
 
     mijncursor.execute("SELECT * FROM crypto")
 
-    return  mijncursor.fetchall()
+    lijst = mijncursor.fetchall()
+    return pd.DataFrame(lijst).to_json(orient = "records")
 
 #print(allecoins)
 
