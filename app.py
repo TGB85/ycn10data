@@ -3,6 +3,7 @@ from Julio import julio
 from endpoint_erik import leuke_functie
 import endpointtamara
 import felixbestand
+import scrappen
 from flask import request
 
 app = Flask(__name__)
@@ -20,9 +21,9 @@ def julioFunctie():
 def endpoint_erik():
     return leuke_functie()
 
-@app.route("/helloworld2")
-def hello_world2():
-    return "<p>Hello, World nummer 2!</p>"
+@app.route("/crypto")
+def endpoint_crypto():
+    return scrappen.return_database()
 
 @app.route("/endpointtamara/posters")
 def posters():
