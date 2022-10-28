@@ -9,9 +9,12 @@ import pandas as pd
 dbverbinding = mysql.connector.connect(
     host='localhost',
     port='3306',
-    user='Victor',
-    password='Victor',
-    database='coinmarketcap'
+    # user='Victor',
+    # password='Victor',
+    # database='coinmarketcap'
+    database='yc202210',
+    user='root',
+    password=''
 )
 
 mijncursor = dbverbinding.cursor()
@@ -66,12 +69,12 @@ for y in range(50):
             #break
 
 
-i =0
-while i < len(alleMarketCaps):
-    sql = "INSERT INTO Crypto (Name, MarketCap) VALUES (%s, %s)"
-    Values = (alleCoinNames[i], alleMarketCaps[i])
-    mijncursor.execute(sql, Values)
-    dbverbinding.commit()
-    i += 1
+# i =0
+# while i < len(alleMarketCaps):
+#     sql = "INSERT INTO Crypto (Name, MarketCap) VALUES (%s, %s)"
+#     Values = (alleCoinNames[i], alleMarketCaps[i])
+#     mijncursor.execute(sql, Values)
+#     dbverbinding.commit()
+#     i += 1
 
-print(return_database())
+# print(return_database())

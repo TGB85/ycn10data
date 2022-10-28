@@ -2,7 +2,7 @@ from flask import Flask
 from Julio import julio
 from endpoint_erik import leuke_functie
 import endpointtamara
-import felixbestand
+# import felixbestand
 import scrappen
 from flask import request
 
@@ -36,13 +36,13 @@ def movies(genre_id):
 
 
 
-@app.route("/checkfelix")
-def functiefelix1():
-    return felixbestand.vanmij5()
+# @app.route("/checkfelix")
+# def functiefelix1():
+#     return felixbestand.vanmij5()
 
-@app.route("/checkfelix2", methods = ['GET', 'POST'])
-def functiefelix2():
-    return felixbestand.nogeen(request)
+# @app.route("/checkfelix2", methods = ['GET', 'POST'])
+# def functiefelix2():
+#     return felixbestand.nogeen(request)
 
 
 

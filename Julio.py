@@ -26,8 +26,8 @@ def julio():
             IMDB9 = IMDB9 + 1
             alleFilms.append("<<<<<<<<<<<<<<<<<<IMDB 9>>>>>>>>>>>>>>>>>>>>>")
 
-        print(IMDB9)
-        print(len(alleFilms))
+        # print(IMDB9)
+        # print(len(alleFilms))
     
     return pd.DataFrame(alleFilms).to_json(orient = "values")
     #return alleFilms
@@ -50,5 +50,5 @@ def julio():
 #     #print(f.read())
 #     return "klein beetje insparatie!"
 
-print(julio())
+# print(julio())
 
