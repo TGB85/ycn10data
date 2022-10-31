@@ -1,0 +1,2 @@
+def hallo():
+    return("hallo")

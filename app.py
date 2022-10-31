@@ -5,12 +5,17 @@ import endpointtamara
 # import felixbestand
 import scrappen
 from flask import request
+import victorbestand
 
 app = Flask(__name__)
 
 @app.route("/")
 def hello_world():
     return "<p>Hello, World!</p>"
+
+@app.route("/victorbestand2")
+def hallotest():
+    return victorbestand.hallo()
 
 
 @app.route("/julioTest1")
