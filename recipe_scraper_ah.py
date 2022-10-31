@@ -65,22 +65,15 @@ def get_food(url):
     
     title = get_title(soup)
     tags = get_tags(soup) 
-    print(split_tags(tags))
+    tags_split = split_tags(tags)
     time = get_time(soup)
     persons = get_persons(soup)
     ingredients = get_ingredients(soup)
     steps = get_steps(soup)
     img = get_img(soup)
-    return {'title': title, 'time':time, 'tags':tags, 'persons':persons, 'ingredients':ingredients, 'steps': steps, 'img': img}
-
-def split_tags(tags):
-    #check_seizoen(i)
-    g = check_gluten(tags)
-    return g
-
-# def check_seizoen(tag):
-#     s = ["lente","zomer","herfst","winter"]
-#     if tag in s:
+    dic = {'title': title, 'time':time, 'persons':persons, 'ingredients':ingredients, 'steps': steps, 'img': img}
+    dic.update(tags_split)
+    return dic
 
 def check_gluten(tags):
     s = "gluten"
@@ -89,14 +82,106 @@ def check_gluten(tags):
             return True
     return False
 
+def check_vegetarisch(tags):
+    s = "vegetarisch"
+    for tag in tags:
+        if s in tag:
+            return True
+    return False
 
+def check_lactose(tags):
+    s = "lactose"
+    for tag in tags:
+        if s in tag:
+            return True
+    return False
 
+def check_veganistisch(tags):
+    s = "veganistisch"
+    for tag in tags:
+        if s in tag:
+            return True
+    return False
+
+def check_zonder_vlees_vis(tags):
+    s = "zonder vlees/vis"
+    for tag in tags:
+        if s in tag:
+            return True
+    return False
+
+def check_kerst(tags):
+    s = "kerst"
+    for tag in tags:
+        if s in tag:
+            return True
+    return False
+
+def check_bbq(tags):
+    s = "barbecue"
+    for tag in tags:
+        if s in tag:
+            return True
+    return False
+
+def check_seizoen(tags):
+    s = ["lente","zomer","herfst","winter"]
+    seasons = [False,False,False,False]
+    for tag in tags:
+        if tag in s[0]:
+            seasons[0]=True
+        if tag in s[1]:
+            seasons[1]=True
+        if tag in s[2]:
+            seasons[2]=True
+        if tag in s[3]:
+            seasons[3]=True
+    return seasons
+
+def check_region(tags):
+    regions = ["aziatisch","mediterraan","zuid-amerikaans","amerikaans","midden-oosters","midden-amerika"]
+    for tag in tags:
+        if tag in regions:
+            return tag
+    return None
+
+def check_country(tags):
+    countries = ["italiaans","hollands","frans","mexicaans","indiaas","thais","spaans","chinees","indonesisch","japans","marokkaans",
+    "grieks","engels","turks","scandinavisch","argentijns","vietnamees","oost-europees"]
+    for tag in tags:
+        if tag in countries:
+            return tag
+    return None
+
+def check_recipe_type(tags):
+    recipe_types = ["pasta","rijst","salade","soep","stamppot","quiche","brood/sandwiches","couscous","wrap","noedels"]
+    for tag in tags:
+        if tag in recipe_types:
+            return tag
+    return None
+
+def split_tags(tags):
+    glutenvrij = check_gluten(tags)
+    vegetarisch = check_vegetarisch(tags)
+    lactosevrij = check_lactose(tags)
+    veganistisch = check_veganistisch(tags)
+    zonder_vlees_vis = check_zonder_vlees_vis(tags)
+    kerst = check_kerst(tags)
+    bbq = check_bbq(tags)
+
+    seizoenen = check_seizoen(tags)
+    keuken1 = check_region(tags)
+    keuken2 = check_country(tags)
+    soort_recept = check_recipe_type(tags)
+    dic = {"glutenvrij":glutenvrij,"vegetarisch":vegetarisch,"lactosevrij":lactosevrij,"veganistisch":veganistisch,"zonder_vlees_vis":zonder_vlees_vis,"kerst":kerst,"bbq":bbq,
+    "lente":seizoenen[0],"zomer":seizoenen[1],"herfst":seizoenen[2],"kerst":seizoenen[3],"keuken1":keuken1,"keuken2":keuken2,"soort_recept":soort_recept}
+    return dic
 
 if __name__ == "__main__":
     url = "https://www.ah.nl/allerhande/recepten-zoeken?menugang=hoofdgerecht"
     urls = get_urls(url)
     recipes = []
-    for i in urls:
+    for i in urls[0:4]:
         url_recept = "https://www.ah.nl"+i
         recipes.append(get_food(url_recept))
-    print(recipes[10])
+    print(recipes[3])
