@@ -64,13 +64,32 @@ def get_food(url):
     soup= BeautifulSoup(reqs.text, 'html.parser')
     
     title = get_title(soup)
-    tags = get_tags(soup)
+    tags = get_tags(soup) 
+    print(split_tags(tags))
     time = get_time(soup)
     persons = get_persons(soup)
     ingredients = get_ingredients(soup)
     steps = get_steps(soup)
     img = get_img(soup)
     return {'title': title, 'time':time, 'tags':tags, 'persons':persons, 'ingredients':ingredients, 'steps': steps, 'img': img}
+
+def split_tags(tags):
+    #check_seizoen(i)
+    g = check_gluten(tags)
+    return g
+
+# def check_seizoen(tag):
+#     s = ["lente","zomer","herfst","winter"]
+#     if tag in s:
+
+def check_gluten(tags):
+    s = "gluten"
+    for tag in tags:
+        if s in tag:
+            return True
+    return False
+
+
 
 
 if __name__ == "__main__":
