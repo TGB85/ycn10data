@@ -6,6 +6,7 @@ import endpointtamara
 import scrappen
 from flask import request
 import victorbestand
+from roelien import functieOefening
 
 app = Flask(__name__)
 
@@ -13,10 +14,13 @@ app = Flask(__name__)
 def hello_world():
     return "<p>Hello, World!</p>"
 
+@app.route("/roelien")
+def functieOefening2():
+    return functieOefening()
+
 @app.route("/victorbestand2")
 def hallotest():
     return victorbestand.hallo()
-
 
 @app.route("/julioTest1")
 def julioFunctie():
