@@ -1,0 +1,22 @@
+Productbackklog
+
+>> Bespreken logica vragen > selectie films, naar user stories.
+
+Recepten
+Ik als developer wil ik n.a.v een tag, alle recepten zien met die tag.
+Als developer wil ik een set van tags hebben. 
+Als developer wil ik het klassediagram voor recepten en tags concreet hebben.
+Als developer wil ik een dataset | SQL-tabel met recepten hebben.
+
+User opslaan, recepten & films opslaan
+Ik wil een user kunnen aanmaken in de dataset.
+Ik wil alleen de films van één user kunnen zien.
+Ik wil aan de suggestie meegeven dat de user niet dezelfde films krijgt te zien (of een kruisje als de film is bekeken).
+Ik als user wil een film opslaan door op een knop te drukken.
+Ik wil als developer een film kunnen toevoegen (met een id) aan een dataset.
+Idem voor recepten.
+
+Endpoints
+Ik als user kan de poster van de films zien.
+(Idem voor dee trailer van de film)
+Ik als user kan een foto (video) van het recept zien.
