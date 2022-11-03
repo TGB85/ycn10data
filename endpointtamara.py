@@ -1,6 +1,6 @@
 import pandas as pd
 from sqlalchemy import create_engine
-from sqlalchemy import text
+from sqlalchemy import text, MetaData
 import json
 
 user = 'root'
@@ -45,6 +45,28 @@ def three_posters():
     posters = [item for item in selection.poster]
     return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
 
+def add_user(user_name):
+    if user_name:
+        query_text = f'''
+        INSERT INTO users (user_name)
+        VALUES ('{user_name}')
+        '''
+        engine = get_connection()
+        with engine.connect().execution_options(autocommit=True) as conn:
+            conn.execute(text(query_text))
+        print("user added")
+    print("no user added")
+
+# def create_user_table():
+#     engine = get_connection()
+#     users = Table(
+#         'users', meta,
+#         Column('id', Integer, primary_key=True),
+#         Column('user_name', String(12), index=True, unique=True)
+#     )
+#     meta.create_all(engine)
+
+# create_user_table()
 # df = pd.read_sql_query('''SELECT * FROM genres''', con=engine)
 # print(df.head())
 
