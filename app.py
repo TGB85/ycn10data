@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from Julio import julio
 from endpoint_erik import leuke_functie
 import endpointtamara
@@ -10,9 +10,18 @@ from roelien import functieOefening
 
 app = Flask(__name__)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+@app.route("/", methods=['POST', 'GET'])
+def add_username():
+    if request.method == 'POST':
+        user_name = request.form['user_name']
+        print(user_name)
+        endpointtamara.add_user(user_name)
+        return f'<p>A new user added with username {user_name}</p>'
+    return '''<form action='/' method = "post">
+            <p>Enter username:</p>
+            <p><input type="text" name="user_name" /></p>
+            <p><button type="submit" value="submit" />Submit</p>
+            </form>'''
 
 @app.route("/roelien")
 def functieOefening2():
