@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 import re
 
 #haalt alle links uit de recepten kaarten van een pagina zoals: 'https://www.ah.nl/allerhande/recepten-zoeken?menugang=hoofdgerecht',
@@ -58,20 +59,28 @@ def get_persons(soup):
     persons = soup.find(class_=s)
     return persons.text
 
+def get_rating(soup):
+    s1 = "allerhande-icon svg svg--svg_star"
+    s2 = "allerhande-icon svg svg--svg_star-half"
+    full_stars = soup.find_all(class_=s1)
+    half_stars = soup.find_all(class_=s2)
+    return len(full_stars)+0.5*len(half_stars)
+
 #gebruikt alle voorgaande functies en voegt de resultaten samen in een dictionary
 def get_food(url):
     reqs= requests.get(url)
     soup= BeautifulSoup(reqs.text, 'html.parser')
-    
-    title = get_title(soup)
+    titel = get_title(soup)
     tags = get_tags(soup) 
     tags_split = split_tags(tags)
     time = get_time(soup)
-    persons = get_persons(soup)
-    ingredients = get_ingredients(soup)
-    steps = get_steps(soup)
+    bereidingstijd, oventijd = split_time(time)
+    aantal_personen = get_persons(soup)
+    ingredienten = get_ingredients(soup)
+    bereidings_stappen = get_steps(soup)
+    rating = get_rating(soup)
     img = get_img(soup)
-    dic = {'title': title, 'time':time, 'persons':persons, 'ingredients':ingredients, 'steps': steps, 'img': img}
+    dic = {'titel': titel, 'bereidingstijd':bereidingstijd, 'oventijd':oventijd, 'aantal_personen':aantal_personen, 'ingredienten':ingredienten, 'bereidings_stappen': bereidings_stappen, 'rating':rating, 'img': img}
     dic.update(tags_split)
     return dic
 
@@ -174,14 +183,41 @@ def split_tags(tags):
     keuken2 = check_country(tags)
     soort_recept = check_recipe_type(tags)
     dic = {"glutenvrij":glutenvrij,"vegetarisch":vegetarisch,"lactosevrij":lactosevrij,"veganistisch":veganistisch,"zonder_vlees_vis":zonder_vlees_vis,"kerst":kerst,"bbq":bbq,
-    "lente":seizoenen[0],"zomer":seizoenen[1],"herfst":seizoenen[2],"kerst":seizoenen[3],"keuken1":keuken1,"keuken2":keuken2,"soort_recept":soort_recept}
+    "lente":seizoenen[0],"zomer":seizoenen[1],"herfst":seizoenen[2],"winter":seizoenen[3],"keuken1":keuken1,"keuken2":keuken2,"soort_recept":soort_recept}
     return dic
 
-if __name__ == "__main__":
-    url = "https://www.ah.nl/allerhande/recepten-zoeken?menugang=hoofdgerecht"
+def split_time(time):
+    bereidingstijd = None
+    oventijd = None
+    for i in time:
+        if "bereiden" in i:
+            bereidingstijd = i.replace("bereiden","")
+        if "oventijd" in i:
+            oventijd = i.replace("oventijd","")
+    return (bereidingstijd,oventijd)
+
+def recipes_page(url):
+    #url = "https://www.ah.nl/allerhande/recepten-zoeken?menugang=hoofdgerecht"
     urls = get_urls(url)
     recipes = []
-    for i in urls[0:4]:
+    n = 1
+    k = len(urls)
+    for i in urls:
+        print(f'recipe {n} out of {k}.')
+        n+=1
         url_recept = "https://www.ah.nl"+i
         recipes.append(get_food(url_recept))
-    print(recipes[3])
+    return pd.DataFrame(recipes)
+
+if __name__ == "__main__":
+    start = 240
+    end = start+18
+    url_base = "https://www.ah.nl/allerhande/recepten-zoeken?menugang=hoofdgerecht"
+    df = pd.DataFrame()
+    for i in range(start,end):
+        url = url_base + f"&page={i}"
+        print(url)
+        df = pd.concat([df,recipes_page(url)])
+    name = f"ah_recipes_{start}-{end}.csv"
+    df.to_csv(name)
+
