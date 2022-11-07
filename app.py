@@ -1,6 +1,7 @@
 from flask import Flask, request
 from Julio import julio
-from endpoint_erik import leuke_functie
+import bestanderik
+import endpointerik
 import endpointtamara
 # import felixbestand
 import scrappen
@@ -36,8 +37,16 @@ def julioFunctie():
     return julio()
 
 @app.route("/erik")
-def endpoint_erik():
-    return leuke_functie()
+def endpointerik():
+    return endpointerik.hallo()
+
+@app.route("/erik2/<filters>")
+def endpointerik2(filters):
+    return bestanderik.recepten(filters)
+
+@app.route("/recept/<filternaam>")
+def abc(filternaam):
+    return endpointerik.recepten()
 
 @app.route("/crypto")
 def endpoint_crypto():
