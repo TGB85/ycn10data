@@ -10,10 +10,10 @@ def connect_to_db():
     "mysql+mysqlconnector://root@localhost/yc202210", echo=False, future=True)
     return engine
 
-def make_query(**filter):
+def make_query(filter):
     where_clause = ''
     for k,v in filter.items():
-        where_clause += f' {v} AND'
+        where_clause += f' {k} = {v} AND'
     where_clause = where_clause[0:-3]
     query = f'SELECT * FROM `recepten` WHERE {where_clause}'
     return query
@@ -25,8 +25,8 @@ def query_sql(query_text):
     return pd.DataFrame(query.fetchall())
 
 def recepten(filters):
-    q = make_query(a=filters)
-    #print(q)
+    q = make_query(filters)
+    print(q)
     df = query_sql(q)
-    #print(df)
-    return df.to_json()
+    print(df)
+    return df.to_json(orient="records")

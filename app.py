@@ -1,11 +1,11 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from Julio import julio
+import json
 import bestanderik
 import endpointerik
 import endpointtamara
 # import felixbestand
 import scrappen
-from flask import request
 import victorbestand
 from roelien import functieOefening
 
@@ -43,6 +43,13 @@ def endpointerik():
 @app.route("/erik2/<filters>")
 def endpointerik2(filters):
     return bestanderik.recepten(filters)
+
+@app.route("/erik3/", methods=["POST"])
+def endpointerik3():
+    post = request.json
+    print(post)
+    res = bestanderik.recepten(post)
+    return res
 
 @app.route("/recept/<filternaam>")
 def abc(filternaam):
