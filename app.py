@@ -9,6 +9,7 @@ import scrappen
 import victorbestand
 from roelien import functieOefening
 
+
 app = Flask(__name__)
 
 @app.route("/", methods=['POST', 'GET'])
@@ -25,12 +26,8 @@ def add_username():
             </form>'''
 
 @app.route("/roelien")
-def functieOefening2():
-    return functieOefening()
-
-@app.route("/victorbestand2")
-def hallotest():
-    return victorbestand.hallo()
+def functie_oefening2():
+    return roelien.find_movie_genre()
 
 @app.route("/julioTest1")
 def julioFunctie():
