@@ -1,18 +1,29 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 from Julio import julio
-from endpoint_erik import leuke_functie
+import json
+import bestanderik
+import endpointerik
 import endpointtamara
 # import felixbestand
 import scrappen
-from flask import request
-import roelien
+import victorbestand
+from roelien import functieOefening
 
 
 app = Flask(__name__)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+@app.route("/", methods=['POST', 'GET'])
+def add_username():
+    if request.method == 'POST':
+        user_name = request.form['user_name']
+        print(user_name)
+        endpointtamara.add_user(user_name)
+        return f'<p>A new user added with username {user_name}</p>'
+    return '''<form action='/' method = "post">
+            <p>Enter username:</p>
+            <p><input type="text" name="user_name" /></p>
+            <p><button type="submit" value="submit" />Submit</p>
+            </form>'''
 
 @app.route("/roelien")
 def functie_oefening2():
@@ -23,8 +34,23 @@ def julioFunctie():
     return julio()
 
 @app.route("/erik")
-def endpoint_erik():
-    return leuke_functie()
+def endpointerik():
+    return endpointerik.hallo()
+
+@app.route("/erik2/<filters>")
+def endpointerik2(filters):
+    return bestanderik.recepten(filters)
+
+@app.route("/erik3/", methods=["POST"])
+def endpointerik3():
+    post = request.json
+    print(post)
+    res = bestanderik.recepten(post)
+    return res
+
+@app.route("/recept/<filternaam>")
+def abc(filternaam):
+    return endpointerik.recepten()
 
 @app.route("/crypto")
 def endpoint_crypto():
