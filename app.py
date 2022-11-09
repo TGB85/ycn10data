@@ -4,6 +4,7 @@ import json
 import bestanderik
 import endpointerik
 import endpointtamara
+import roelien
 # import felixbestand
 #Voor nu uigecomment
 # import scrappen
@@ -26,9 +27,9 @@ def add_username():
             <p><button type="submit" value="submit" />Submit</p>
             </form>'''
 
-#@app.route("/roelien")
-#def functie_oefening2():
-#    return roelien.find_movie_genre()
+@app.route("/roelien")
+def geef_een_genre(genre):
+    return roelien.geef_een_genre(genre)
 
 @app.route("/julioTest1")
 def julioFunctie():
