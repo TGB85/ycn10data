@@ -4,7 +4,7 @@ import json
 import bestanderik
 import endpointerik
 import endpointtamara
-import roelien
+from roelien import roelien
 # import felixbestand
 #Voor nu uigecomment
 # import scrappen
@@ -28,8 +28,8 @@ def add_username():
             </form>'''
 
 @app.route("/roelien")
-def geef_een_genre(genre):
-    return roelien.geef_een_genre(genre)
+def test_roelien():
+    return roelien()
 
 @app.route("/julioTest1")
 def julioFunctie():
