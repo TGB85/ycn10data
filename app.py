@@ -5,9 +5,10 @@ import bestanderik
 import endpointerik
 import endpointtamara
 # import felixbestand
-import scrappen
-import victorbestand
-from roelien import functieOefening
+#Voor nu uigecomment
+# import scrappen
+#import victorbestand
+#from roelien import functieOefening
 
 
 app = Flask(__name__)
@@ -25,9 +26,9 @@ def add_username():
             <p><button type="submit" value="submit" />Submit</p>
             </form>'''
 
-@app.route("/roelien")
-def functie_oefening2():
-    return roelien.find_movie_genre()
+#@app.route("/roelien")
+#def functie_oefening2():
+#    return roelien.find_movie_genre()
 
 @app.route("/julioTest1")
 def julioFunctie():
