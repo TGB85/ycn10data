@@ -6,8 +6,9 @@ import endpointerik
 import endpointtamara
 # import felixbestand
 import scrappen
-from flask import request
 import victorbestand
+from roelien import functieOefening
+
 
 app = Flask(__name__)
 
@@ -73,6 +74,3 @@ def movies(genre_id):
 # @app.route("/checkfelix2", methods = ['GET', 'POST'])
 # def functiefelix2():
 #     return felixbestand.nogeen(request)
-
-
-
