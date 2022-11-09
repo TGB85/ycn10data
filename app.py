@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from Julio import julio
 import json
 import bestanderik
-import endpointerik
+#import endpointerik
 import endpointtamara
 # import felixbestand
 #Voor nu uigecomment
@@ -36,22 +36,14 @@ def julioFunctie():
 
 @app.route("/erik")
 def endpointerik():
-    return endpointerik.hallo()
+    return bestanderik.hallo()
 
-@app.route("/erik2/<filters>")
-def endpointerik2(filters):
-    return bestanderik.recepten(filters)
-
-@app.route("/erik3/", methods=["POST"])
-def endpointerik3():
+@app.route("/erik2/", methods=["POST"])
+def endpointerik2():
     post = request.json
     print(post)
     res = bestanderik.recepten(post)
     return res
-
-@app.route("/recept/<filternaam>")
-def abc(filternaam):
-    return endpointerik.recepten()
 
 @app.route("/crypto")
 def endpoint_crypto():
