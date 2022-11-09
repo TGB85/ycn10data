@@ -74,6 +74,3 @@ def movies(genre_id):
 # @app.route("/checkfelix2", methods = ['GET', 'POST'])
 # def functiefelix2():
 #     return felixbestand.nogeen(request)
-
-
-
