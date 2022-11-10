@@ -3,7 +3,10 @@ import sqlalchemy as sqla
 from sqlalchemy import create_engine
 from sqlalchemy import text
 import os
-from decouple import config
+try:
+    from decouple import config
+except:
+    pass
 
 def hallo():
     return("hallo!")
