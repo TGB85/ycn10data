@@ -2,18 +2,21 @@ import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy import text, MetaData
 import json
+from urllib.parse import quote
 
-user = 'root'
-password = ''
-host = '127.0.0.1'
-port = 3306
-database = 'yc202210'
+# user = 'root'
+# password = ''
+# host = '127.0.0.1'
+# port = 3306
+# database = 'yc202210'
+
+pwd='abcd1234ABCD!@#$'
+ssl_args = {'ssl_ca': 
+	'\DigiCertGlobalRootCA.crt.pem'}
 
 def get_connection():
-    return create_engine(
-        url="mysql+mysqlconnector://{user}:{pw}@{host}/{db}".format(
-            host=host, db=database, user=user, pw=password)
-    )
+    return create_engine('mysql+mysqlconnector://rootadmin:%s@yc2210netflixdbpython.mysql.database.azure.com/movies' %quote(pwd),
+				connect_args=ssl_args)
 
 def make_query(genre):
     return f'''
@@ -45,17 +48,17 @@ def three_posters():
     posters = [item for item in selection.poster]
     return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
 
-def add_user(user_name):
-    if user_name:
-        query_text = f'''
-        INSERT INTO users (user_name)
-        VALUES ('{user_name}')
-        '''
-        engine = get_connection()
-        with engine.connect().execution_options(autocommit=True) as conn:
-            conn.execute(text(query_text))
-        print("user added")
-    print("no user added")
+# def add_user(user_name):
+#     if user_name:
+#         query_text = f'''
+#         INSERT INTO users (user_name)
+#         VALUES ('{user_name}')
+#         '''
+#         engine = get_connection()
+#         with engine.connect().execution_options(autocommit=True) as conn:
+#             conn.execute(text(query_text))
+#         print("user added")
+#     print("no user added")
 
 # def create_user_table():
 #     engine = get_connection()
@@ -73,11 +76,11 @@ def add_user(user_name):
 if __name__ == '__main__':
     try:
         engine = get_connection()
-        print(f"Connection to {host} created.")
+        print(f"Connection created.")
     except Exception as er_msg:
         print("Connection failed due to error: \n", er_msg)
     
-    print(three_movies_per_genre(genre_id=1))
+    # print(three_movies_per_genre(genre_id=1))
     print(three_posters())
 
 
