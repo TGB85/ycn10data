@@ -3,20 +3,20 @@ from sqlalchemy import create_engine
 from sqlalchemy import text, MetaData
 import json
 from urllib.parse import quote
+import os
 
-# user = 'root'
-# password = ''
-# host = '127.0.0.1'
-# port = 3306
-# database = 'yc202210'
+user = os.getenv('DB_USERNAME')
+password = os.getenv('DB_PASSWORD')
+host = 'yc2210netflixdbpython.mysql.database.azure.com'
+database = 'movies'
 
-pwd='abcd1234ABCD!@#$'
 ssl_args = {'ssl_ca': 
 	'\DigiCertGlobalRootCA.crt.pem'}
 
 def get_connection():
-    return create_engine('mysql+mysqlconnector://rootadmin:%s@yc2210netflixdbpython.mysql.database.azure.com/movies' %quote(pwd),
-				connect_args=ssl_args)
+    return create_engine("mysql+mysqlconnector://{user}:{pw}@{host}/{db}".format(host=host, db=database, user=user, pw=password)
+            )
+            
 
 def make_query(genre):
     return f'''
@@ -47,31 +47,6 @@ def three_posters():
     selection = data.sample(n=3)
     posters = [item for item in selection.poster]
     return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
-
-# def add_user(user_name):
-#     if user_name:
-#         query_text = f'''
-#         INSERT INTO users (user_name)
-#         VALUES ('{user_name}')
-#         '''
-#         engine = get_connection()
-#         with engine.connect().execution_options(autocommit=True) as conn:
-#             conn.execute(text(query_text))
-#         print("user added")
-#     print("no user added")
-
-# def create_user_table():
-#     engine = get_connection()
-#     users = Table(
-#         'users', meta,
-#         Column('id', Integer, primary_key=True),
-#         Column('user_name', String(12), index=True, unique=True)
-#     )
-#     meta.create_all(engine)
-
-# create_user_table()
-# df = pd.read_sql_query('''SELECT * FROM genres''', con=engine)
-# print(df.head())
 
 if __name__ == '__main__':
     try:
