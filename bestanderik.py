@@ -2,6 +2,7 @@ import pandas as pd
 import sqlalchemy as sqla
 from sqlalchemy import create_engine
 from sqlalchemy import text
+import os
 
 def hallo():
     return("hallo!")
@@ -14,8 +15,8 @@ def connect_to_db():
 def connect_to_db_online():
     url = sqla.engine.URL.create(
         drivername='mysql+mysqlconnector',
-        username="rootadmin",
-        password="abcd1234ABCD!@#$",
+        username = os.getenv('DB_USERNAME'),
+        password = os.getenv('DB_PASSWORD'),
         host="yc2210netflixdbpython.mysql.database.azure.com",
         database="recepten"
     )
@@ -23,8 +24,10 @@ def connect_to_db_online():
     url, echo=False, future=True)
     return engine
 
-def make_query(filter):
+def make_query(filter={}):
     where_clause = ''
+    if filter == {}:
+        return 'SELECT * FROM `recepten`'
     for k,v in filter.items():
         where_clause += f' {k} = {v} AND'
     where_clause = where_clause[0:-3]
@@ -37,11 +40,14 @@ def query_sql(query_text):
         query = conn.execute(text(query_text))
     return pd.DataFrame(query.fetchall())
 
+#def een_recept(i):
+#    q = make_query({'id':int(i)})
+#    df = query_sql(q)
+#    return df.to_json(orient="records")
+
 def recepten(filters):
     q = make_query(filters)
-    print(q)
     df = query_sql(q)
-    print(df)
     return df.to_json(orient="records")
 
 if __name__ == '__main__':
