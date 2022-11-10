@@ -1,4 +1,5 @@
 import pandas as pd
+import sqlalchemy as sqla
 from sqlalchemy import create_engine
 from sqlalchemy import text
 
@@ -10,6 +11,18 @@ def connect_to_db():
     "mysql+mysqlconnector://root@localhost/yc202210", echo=False, future=True)
     return engine
 
+def connect_to_db_online():
+    url = sqla.engine.URL.create(
+        drivername='mysql+mysqlconnector',
+        username="rootadmin",
+        password="abcd1234ABCD!@#$",
+        host="yc2210netflixdbpython.mysql.database.azure.com",
+        database="recepten"
+    )
+    engine = create_engine(
+    url, echo=False, future=True)
+    return engine
+
 def make_query(filter):
     where_clause = ''
     for k,v in filter.items():
@@ -19,7 +32,7 @@ def make_query(filter):
     return query
 
 def query_sql(query_text):
-    engine = connect_to_db()
+    engine = connect_to_db_online()
     with engine.connect().execution_options(autocommit=True) as conn:
         query = conn.execute(text(query_text))
     return pd.DataFrame(query.fetchall())
@@ -30,3 +43,9 @@ def recepten(filters):
     df = query_sql(q)
     print(df)
     return df.to_json(orient="records")
+
+if __name__ == '__main__':
+    a = connect_to_db_online()
+    print(a)
+    b = recepten({'vegetarisch':1})
+    print(b)
