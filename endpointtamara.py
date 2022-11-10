@@ -6,7 +6,7 @@ from urllib.parse import quote
 import os
 
 user = os.getenv('DB_USERNAME')
-password = os.getenv('DB_PASSWORD')
+pwd = os.getenv('DB_PASSWORD')
 host = 'yc2210netflixdbpython.mysql.database.azure.com'
 database = 'movies'
 
@@ -14,8 +14,9 @@ ssl_args = {'ssl_ca':
 	'\DigiCertGlobalRootCA.crt.pem'}
 
 def get_connection():
-    return create_engine("mysql+mysqlconnector://{user}:{pw}@{host}/{db}".format(host=host, db=database, user=user, pw=password)
-            )
+    return create_engine('mysql+mysqlconnector://%s:%s@yc2210netflixdbpython.mysql.database.azure.com/movies' % (quote(user), quote(pwd)),
+				connect_args=ssl_args)
+            
             
 
 def make_query(genre):
