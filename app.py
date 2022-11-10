@@ -46,6 +46,10 @@ def endpointerik2():
     res = bestanderik.recepten(post)
     return res
 
+@app.route("/een_recept/<i>")
+def endpointerik3():
+    return bestanderik.een_recept(i)
+
 @app.route("/crypto")
 def endpoint_crypto():
     return scrappen.return_database()
