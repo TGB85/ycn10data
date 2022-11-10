@@ -63,7 +63,9 @@ def movies(genre_id):
     print(f"genre_id = {genre_id}")
     return endpointtamara.three_movies_per_genre(genre_id)
 
-
+@app.route("/filters/<rating>/<min_age>/<excl_genres>")
+def get_filters(rating, min_age, excl_genres):
+        return endpointtamara.filter_online_db(rating, min_age, excl_genres)
 
 # @app.route("/checkfelix")
 # def functiefelix1():
