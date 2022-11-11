@@ -56,9 +56,14 @@ def three_posters():
     selection = data.sample(n=3)
     posters = [item for item in selection.poster]
     return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
-
 def filter_online_db(rating, min_age, excl_genres):
     engine = get_connection()
+    # genres = excl_genres.split(',')
+    # exclude = ''
+    # for genre in genres[:-1]:
+    #     exclude += f"movies_genres.genre_{genre} IS NULL AND "
+    # exclude += f"movies_genres.genre_{genres[-1]} IS NULL"
+    # slash=r'https://m.media-amazon.com/images/M/' # replace(movies.from_api.poster, "https://m.media-amazon.com/images/M/", "{slash}"), 
     query_text = f'''
     SELECT movies.movie.title, 
         movies.from_api.poster,
@@ -67,18 +72,22 @@ def filter_online_db(rating, min_age, excl_genres):
         JOIN movies.from_api
             ON movies.from_api.movie_id = movies.movie.id
         WHERE movies.movie.imdb_rating >= {rating}
-            AND movies.movie.min_age >= {min_age}
-            AND movies.movie.id IN (
+            AND movies.movie.min_age <= {min_age}
+            AND movies.movie.id NOT IN (
                 SELECT movie_id
                 FROM movies.movie_genre
-                WHERE genre_id NOT IN ({excl_genres})
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id IN ({excl_genres})
                 );
     '''
     with engine.connect().execution_options(autocommit=True) as conn:
         query = conn.execute(query_text)
     data = pd.DataFrame(query.fetchall())
-    # unescape slash: json.dumps(json.loads(sample.to_json()))
-    return data.sample(n=3).to_json(orient = "records")
+    json_obj = data.sample(n=3).to_json(orient = "records")
+    # print(sample.poster)
+    # json_obj = sample
+    return json.dumps(json.loads(json_obj))
 
 if __name__ == '__main__':
     try:
