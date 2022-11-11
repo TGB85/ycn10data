@@ -56,14 +56,9 @@ def three_posters():
     selection = data.sample(n=3)
     posters = [item for item in selection.poster]
     return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
+
 def filter_online_db(rating, min_age, excl_genres):
     engine = get_connection()
-    # genres = excl_genres.split(',')
-    # exclude = ''
-    # for genre in genres[:-1]:
-    #     exclude += f"movies_genres.genre_{genre} IS NULL AND "
-    # exclude += f"movies_genres.genre_{genres[-1]} IS NULL"
-    # slash=r'https://m.media-amazon.com/images/M/' # replace(movies.from_api.poster, "https://m.media-amazon.com/images/M/", "{slash}"), 
     query_text = f'''
     SELECT movies.movie.title, 
         movies.from_api.poster,
@@ -85,9 +80,7 @@ def filter_online_db(rating, min_age, excl_genres):
         query = conn.execute(query_text)
     data = pd.DataFrame(query.fetchall())
     json_obj = data.sample(n=3).to_json(orient = "records")
-    # print(sample.poster)
-    # json_obj = sample
-    return json.dumps(json.loads(json_obj))
+    return json.loads(json_obj)
 
 if __name__ == '__main__':
     try:
