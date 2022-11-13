@@ -11,21 +11,11 @@ from roelien import roelien
 #import victorbestand
 #from roelien import functieOefening
 
-
 app = Flask(__name__)
 
-@app.route("/", methods=['POST', 'GET'])
-def add_username():
-    if request.method == 'POST':
-        user_name = request.form['user_name']
-        print(user_name)
-        endpointtamara.add_user(user_name)
-        return f'<p>A new user added with username {user_name}</p>'
-    return '''<form action='/' method = "post">
-            <p>Enter username:</p>
-            <p><input type="text" name="user_name" /></p>
-            <p><button type="submit" value="submit" />Submit</p>
-            </form>'''
+@app.route("/")
+def posters():
+    return endpointtamara.three_posters()
 
 @app.route("/roelien")
 def test_roelien():
@@ -50,13 +40,9 @@ def endpointerik2():
 def endpointerik3(i):
     return bestanderik.een_recept(i)
 
-@app.route("/crypto")
-def endpoint_crypto():
-    return scrappen.return_database()
-
-@app.route("/endpointtamara/posters")
-def posters():
-    return endpointtamara.three_posters()
+# @app.route("/crypto")
+# def endpoint_crypto():
+#     return scrappen.return_database()
 
 @app.route("/endpointtamara/<int:genre_id>")
 def movies(genre_id):
@@ -66,6 +52,10 @@ def movies(genre_id):
 @app.route("/filters/<rating>/<min_age>/<excl_genres>")
 def get_filters(rating, min_age, excl_genres):
         return endpointtamara.filter_online_db(rating, min_age, excl_genres)
+
+@app.route("/filters/<rating>/<min_age>/<excl_genres>/<incl_groups>")
+def get_filtered(rating, min_age, excl_genres, incl_groups):
+    return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups)
 
 # @app.route("/checkfelix")
 # def functiefelix1():

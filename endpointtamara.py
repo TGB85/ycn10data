@@ -12,8 +12,6 @@ host = 'yc2210netflixdbpython.mysql.database.azure.com'
 database = 'movies'
 
 # ssl_args = {'ssl_ca': '\DigiCertGlobalRootCA.crt.pem'}
-# create_engine('mysql+mysqlconnector://%s:%s@yc2210netflixdbpython.mysql.database.azure.com/movies' %(quote(user), quote(pwd)),
-# 			connect_args=ssl_args, encoding='utf-8-sig')`
 
 sql_url = {'drivername': "mysql+mysqlconnector",
             'username': user,
@@ -24,13 +22,18 @@ sql_url = {'drivername': "mysql+mysqlconnector",
             }
 
 def get_connection():
+    # return create_engine('mysql+mysqlconnector://%s:%s@yc2210netflixdbpython.mysql.database.azure.com/movies' %(quote(user), quote(pwd)),
+	# 		connect_args=ssl_args, encoding='utf-8-sig')
     return create_engine(URL.create(**sql_url), encoding='utf-8-sig')     
             
 
 def make_query(genre):
     return f'''
-    SELECT tconst FROM movies_genres
-    WHERE genre_{genre} is not NULL;
+    SELECT movies.movie.title
+    FROM movies.movie
+    JOIN movies.movie_genre
+        ON movies.movie.id = movies.movie_genre.movie_id
+    WHERE genre_id = {genre};
     '''
 
 def query_sql(query_text):
@@ -44,13 +47,13 @@ def three_movies_per_genre(genre_id=0):
     query_test = make_query(genre_id)
     data = query_sql(query_test)
     selection = data.sample(n=3)
-    result = json.dumps(selection.tconst.to_dict())
+    result = json.dumps(selection.title.to_dict())
     return result
 
 def three_posters():
     query_text = '''
-        SELECT poster 
-        FROM from_api;
+        SELECT movies.from_api.poster 
+        FROM movies.from_api;
         '''
     data = query_sql(query_text)
     selection = data.sample(n=3)
@@ -60,7 +63,8 @@ def three_posters():
 def filter_online_db(rating, min_age, excl_genres):
     engine = get_connection()
     query_text = f'''
-    SELECT movies.movie.title, 
+    SELECT movies.movie.id,
+        movies.movie.title, 
         movies.from_api.poster,
         movies.from_api.plot 
     FROM movies.movie
@@ -82,6 +86,77 @@ def filter_online_db(rating, min_age, excl_genres):
     json_obj = data.sample(n=3).to_json(orient = "records")
     return json.loads(json_obj)
 
+def filter_include(rating, min_age, excl_genres, incl_groups):
+    engine = get_connection()
+    genre_1, genre_2, genre_3 = incl_groups.split(',')
+    query_text = f'''
+        SELECT movies.movie.id,
+            movies.movie.title, 
+            movies.from_api.poster,
+            movies.from_api.plot 
+        FROM
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_1})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_2})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                            JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                            WHERE group_id = {genre_3})
+            UNION
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_1})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_2})
+            ORDER BY RAND() DESC
+            LIMIT 10)
+            UNION
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id	
+                                        WHERE group_id = {genre_1})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_3})
+            ORDER BY RAND() DESC
+            LIMIT 10)
+            UNION
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_2})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_3})
+            ORDER BY RAND() DESC
+            LIMIT 10)
+            ) three_genres
+
+        JOIN movies.from_api ON movies.from_api.movie_id = three_genres.id
+        JOIN movies.movie ON movies.movie.id = three_genres.id
+
+        WHERE movies.movie.imdb_rating >= {rating}
+            AND movies.movie.min_age <= {min_age}
+            AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id IN ({excl_genres})
+                )
+                
+        ORDER BY RAND() DESC
+        LIMIT 3;
+        '''
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(query_text)
+    return json.dumps([(dict(row._mapping.items())) for row in query])
+
 if __name__ == '__main__':
     try:
         engine = get_connection()
@@ -92,5 +167,6 @@ if __name__ == '__main__':
     # print(three_movies_per_genre(genre_id=1))
     # print(three_posters())
     # print(filter_online_db(5.0,  14, '9,0'))
+    # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7'))
 
 
