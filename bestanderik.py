@@ -2,6 +2,7 @@ import pandas as pd
 import sqlalchemy as sqla
 from sqlalchemy import create_engine
 from sqlalchemy import text
+import json
 import os
 import random
 try:
@@ -40,19 +41,22 @@ def connect_to_db_online():
 def make_where(filter):
     where_clause = ''
     for k,v in filter.items():
-        print(type(v))
         if type(v)==str:
             where_clause += f" {k} = '{v}' AND"
         elif type(v)==list:
-            in_part = '('
-            for j in v:
-                in_part += f"'{j}',"
-            in_part = in_part[:-1]+')'
+            in_part = make_in(v)
             where_clause += f" {k} in {in_part} AND"
         else:
             where_clause += f' {k} = {v} AND'
     where_clause = where_clause[0:-3]
     return where_clause
+
+def make_in(lst):
+    in_part = '('
+    for j in lst:
+        in_part += f"'{j}',"
+    in_part = in_part[:-1]+')'
+    return in_part
 
 def make_query(filter={}):
     if filter == {}:
@@ -86,15 +90,18 @@ def recepten(filters):
 
 def drie_recepten(filters):
     w = make_where(filters)
-    print(w)
     df1 = query_sql(f'SELECT * FROM `recepten`.`recepten` WHERE {w} ORDER BY RAND() LIMIT 3')
+    if df1.empty:
+        print('Query had no results')
+        return json.dumps("no recipes found, search to narrow")
     ids = list(df1['id'])
-    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN ({ids[0]},{ids[1]},{ids[2]}) ')
+    in_part = make_in(ids)
+    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN ({in_part}) ')
     res = pd.merge(df1,df2,on='id')
     return res.to_json(orient="records")
 
 if __name__ == '__main__':
     #a = random_recept()
     #print(a)
-    b = drie_recepten({'bbq':1,'zomer':1,'soort_recept':["pasta","rijst"]})
+    b = drie_recepten({"vegetarisch":1,'zomer':1,'keuken1':'amerikaans','zonder_vlees_vis':0,'kerst':1})
     print(b)
