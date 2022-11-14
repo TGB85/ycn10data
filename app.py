@@ -5,6 +5,7 @@ import bestanderik
 #import endpointerik
 import endpointtamara
 from roelien import roelien
+import pandas as pd
 # import felixbestand
 #Voor nu uigecomment
 # import scrappen
@@ -20,7 +21,11 @@ def posters():
 @app.route("/dorine/<tekst>")
 def select_movies(tekst):
     film = {'tekst': tekst, 'title': 'My Little Pony: A New Generation', 'poster': 'https://m.media-amazon.com/images/M/MV5BOTY4ZmZjY2YtODg4ZS00YjlkLWJhOWMtMDU4Y2YyYjMwMDEzXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_SX300.jpg', 'plot': 'After the time of the Mane 6, Sunny--a young Earth Pony--and her new Unicorn friend Izzy explore their world and strive to restore Harmony to Equestria.'}
-    return json.dumps(film)
+    result = json.dumps(film)
+    return json.loads(result)
+
+
+# print(select_movies('tekst'))
 
 @app.route("/roelien")
 def test_roelien():
