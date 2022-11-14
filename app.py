@@ -17,6 +17,10 @@ app = Flask(__name__)
 def posters():
     return endpointtamara.three_posters()
 
+@app.route("/dorine")
+def select_movies():
+    return endpointtamara.voor_dorine()
+
 @app.route("/roelien")
 def test_roelien():
     return roelien()
