@@ -158,24 +158,6 @@ def filter_include(rating, min_age, excl_genres, incl_groups):
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result)
 
-def voor_dorine():
-    engine = get_connection()
-    query_text = '''SELECT movies.movie.id,
-        movies.movie.title, 
-        movies.from_api.poster,
-        movies.from_api.plot 
-    FROM movies.movie
-        JOIN movies.from_api
-            ON movies.from_api.movie_id = movies.movie.id
-    ORDER BY movies.movie.id
-    LIMIT 3;
-    '''
-    with engine.connect().execution_options(autocommit=True) as conn:
-        query = conn.execute(text(query_text))
-    data = pd.DataFrame(query.fetchall())
-    json_obj = data.sample(n=3).to_json(orient = "records")
-    return json.loads(json_obj)
-
 if __name__ == '__main__':
     try:
         engine = get_connection()
@@ -187,5 +169,4 @@ if __name__ == '__main__':
     # print(three_posters())
     # print(filter_online_db(5.0,  14, '9,0'))
     # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7'))
-    print(voor_dorine())
 
