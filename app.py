@@ -32,13 +32,24 @@ def endpointerik():
 @app.route("/erik2/", methods=["POST"])
 def endpointerik2():
     post = request.json
-    print(post)
+    #print(post)
     res = bestanderik.recepten(post)
     return res
 
 @app.route("/een_recept/<int:i>")
 def endpointerik3(i):
     return bestanderik.een_recept(i)
+
+@app.route("/drie_recepten/", methods=["POST"])
+def endpointerik4():
+    post = request.json
+    #print(post)
+    res = bestanderik.drie_recepten(post)
+    return res
+
+@app.route("/random_recept/")
+def endpointerik5():
+    return bestanderik.random_recept()
 
 # @app.route("/crypto")
 # def endpoint_crypto():

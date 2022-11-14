@@ -3,6 +3,7 @@ import sqlalchemy as sqla
 from sqlalchemy import create_engine
 from sqlalchemy import text
 import os
+import random
 try:
     from decouple import config
 except:
@@ -36,13 +37,17 @@ def connect_to_db_online():
     url, echo=False, future=True)
     return engine
 
-def make_query(filter={}):
+def make_where(filter):
     where_clause = ''
-    if filter == {}:
-        return 'SELECT * FROM `recepten`.`recepten`'
     for k,v in filter.items():
         where_clause += f' {k} = {v} AND'
     where_clause = where_clause[0:-3]
+    return where_clause
+
+def make_query(filter={}):
+    if filter == {}:
+        return 'SELECT * FROM `recepten`.`recepten`'
+    where_clause = make_where(filter)
     query = f'SELECT * FROM `recepten`.`recepten` WHERE {where_clause}'
     return query
 
@@ -58,11 +63,27 @@ def een_recept(i):
     res = pd.merge(df,df2,on='id')
     return res.to_json(orient="records")
 
+def random_recept():
+    m = query_sql('SELECT MAX(id) AS m FROM `recepten`.`recepten`')['m'][0]
+    i = random.randint(0,m)
+    res = een_recept(i)
+    return res
+
 def recepten(filters):
     q = make_query(filters)
     df = query_sql(q)
     return df.to_json(orient="records")
 
+def drie_recepten(filters):
+    w = make_where(filters)
+    df1 = query_sql(f'SELECT * FROM `recepten`.`recepten` WHERE {w} ORDER BY RAND() LIMIT 3')
+    ids = list(df1['id'])
+    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN ({ids[0]},{ids[1]},{ids[2]}) ')
+    res = pd.merge(df1,df2,on='id')
+    return res.to_json(orient="records")
+
 if __name__ == '__main__':
-    a = een_recept(3)
-    print(a)
+    #a = random_recept()
+    #print(a)
+    b = drie_recepten({'bbq':1,'zomer':1})
+    print(b)
