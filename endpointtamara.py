@@ -155,7 +155,8 @@ def filter_include(rating, min_age, excl_genres, incl_groups):
         '''
     with engine.connect().execution_options(autocommit=True) as conn:
         query = conn.execute(query_text)
-    return json.dumps([(dict(row._mapping.items())) for row in query])
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result)
 
 if __name__ == '__main__':
     try:

@@ -57,6 +57,20 @@ def get_filters(rating, min_age, excl_genres):
 def get_filtered(rating, min_age, excl_genres, incl_groups):
     return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups)
 
+@app.route('/filter_movies', methods=['POST', 'GET'])
+def filter_and_include():
+    if request.method == 'POST':
+        data = json.loads(request.data)
+        rating = data['rating']
+        min_age = data['min_age']
+        excl_genres = data['excl_genres'] 
+        if 'incl_groups' in data.keys():
+            incl_groups = data['incl_groups']
+            return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups)
+        else:
+            return endpointtamara.filter_online_db(rating, min_age, excl_genres)
+    return "POST 'rating', 'min_age' and 'excl_genres', optional 'incl_groups'."
+
 # @app.route("/checkfelix")
 # def functiefelix1():
 #     return felixbestand.vanmij5()
