@@ -85,8 +85,15 @@ def random_recept():
 
 def recepten(filters):
     q = make_query(filters)
-    df = query_sql(q)
-    return df.to_json(orient="records")
+    df1 = query_sql(q)
+    if df1.empty:
+        print('Query had no results')
+        return json.dumps("no recipes found, search to narrow")
+    ids = list(df1['id'])
+    in_part = make_in(ids)
+    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN ({in_part}) ')
+    res = pd.merge(df1,df2,on='id')
+    return res.to_json(orient="records")
 
 def drie_recepten(filters):
     w = make_where(filters)
@@ -103,5 +110,5 @@ def drie_recepten(filters):
 if __name__ == '__main__':
     #a = random_recept()
     #print(a)
-    b = drie_recepten({"vegetarisch":1,'zomer':1,'keuken1':'amerikaans','zonder_vlees_vis':0,'kerst':1})
+    b = recepten({"vegetarisch":1,'zomer':1,'keuken1':'amerikaans'})
     print(b)
