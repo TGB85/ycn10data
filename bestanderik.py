@@ -40,7 +40,17 @@ def connect_to_db_online():
 def make_where(filter):
     where_clause = ''
     for k,v in filter.items():
-        where_clause += f' {k} = {v} AND'
+        print(type(v))
+        if type(v)==str:
+            where_clause += f" {k} = '{v}' AND"
+        elif type(v)==list:
+            in_part = '('
+            for j in v:
+                in_part += f"'{j}',"
+            in_part = in_part[:-1]+')'
+            where_clause += f" {k} in {in_part} AND"
+        else:
+            where_clause += f' {k} = {v} AND'
     where_clause = where_clause[0:-3]
     return where_clause
 
@@ -76,6 +86,7 @@ def recepten(filters):
 
 def drie_recepten(filters):
     w = make_where(filters)
+    print(w)
     df1 = query_sql(f'SELECT * FROM `recepten`.`recepten` WHERE {w} ORDER BY RAND() LIMIT 3')
     ids = list(df1['id'])
     df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN ({ids[0]},{ids[1]},{ids[2]}) ')
@@ -85,5 +96,5 @@ def drie_recepten(filters):
 if __name__ == '__main__':
     #a = random_recept()
     #print(a)
-    b = drie_recepten({'bbq':1,'zomer':1})
+    b = drie_recepten({'bbq':1,'zomer':1,'soort_recept':["pasta","rijst"]})
     print(b)
