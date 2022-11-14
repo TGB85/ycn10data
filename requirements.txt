@@ -2,4 +2,3 @@ flask
 pandas
 sqlalchemy
 mysql-connector-python
-random
