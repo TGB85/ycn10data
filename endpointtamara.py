@@ -86,9 +86,15 @@ def filter_online_db(rating, min_age, excl_genres):
     json_obj = data.sample(n=3).to_json(orient = "records")
     return json.loads(json_obj)
 
-def filter_include(rating, min_age, excl_genres, incl_groups):
+def filter_include(rating, min_age, excl_genres, incl_groups, lang=''):
     engine = get_connection()
     genre_1, genre_2, genre_3 = incl_groups.split(',')
+    if len(lang) == 0:
+        excl_lang = lang
+    elif len(lang) == 1:
+        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN ('{lang[0]}'))"
+    elif len(lang) > 1:
+        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN {tuple(lang)})"
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
@@ -142,6 +148,7 @@ def filter_include(rating, min_age, excl_genres, incl_groups):
 
         WHERE movies.movie.imdb_rating >= {rating}
             AND movies.movie.min_age <= {min_age}
+            {excl_lang}
             AND movies.movie.id NOT IN (
                 SELECT movie_id
                 FROM movies.movie_genre
@@ -158,6 +165,81 @@ def filter_include(rating, min_age, excl_genres, incl_groups):
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result)
 
+def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
+    engine = get_connection()
+    if len(lang) == 0:
+        excl_lang = lang
+    elif len(lang) == 1:
+        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN ('{lang[0]}'))"
+    elif len(lang) > 1:
+        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN {tuple(lang)})"
+    query_text = f'''
+        SELECT movies.movie.id,
+            movies.movie.title, 
+            movies.from_api.poster,
+            movies.from_api.plot 
+        FROM
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_group})
+        ) one_genre
+
+        JOIN movies.from_api ON movies.from_api.movie_id = one_genre.id
+        JOIN movies.movie ON movies.movie.id = one_genre.id
+
+        WHERE movies.movie.imdb_rating >= {rating}
+            AND movies.movie.min_age <= {min_age}
+            {excl_lang}
+            AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id IN ({excl_genres})
+                )
+                
+        ORDER BY RAND() DESC
+        LIMIT 3;
+        '''
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(query_text)
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result)
+
+def get_genres():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('SELECT id, genre_text FROM movies.genre'))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result)
+
+def get_languages():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('''
+        SELECT lang FROM movies.from_api
+        WHERE lang IS NOT NULL
+        GROUP BY lang
+        HAVING COUNT(*) > 10;'''))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result) 
+
+def get_min_age():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('SELECT DISTINCT min_age FROM movies.movie'))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result) 
+
+def get_genre_group():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('SELECT DISTINCT group_id, group_text FROM movies.genre WHERE group_id IS NOT NULL'))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result) 
+
+
 if __name__ == '__main__':
     try:
         engine = get_connection()
@@ -169,4 +251,6 @@ if __name__ == '__main__':
     # print(three_posters())
     # print(filter_online_db(5.0,  14, '9,0'))
     # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7'))
-
+    # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7', lang=['East_Asian']))
+    # print(filter_include(rating=5.0, min_age=18, excl_genres='9', incl_groups='0,4,7', lang=['East_Asian', 'South_Asian']))
+    # print(get_genres())
