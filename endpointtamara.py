@@ -168,11 +168,13 @@ def filter_include(rating, min_age, excl_genres, incl_groups, lang=''):
 def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
     engine = get_connection()
     if len(lang) == 0:
-        excl_lang = lang
-    elif len(lang) == 1:
-        excl_lang = f"AND movies.from_api.lang != '{lang[0]}')"
-    elif len(lang) > 1:
-        excl_lang = f"AND movies.from_api.lang NOT IN {tuple(lang)}"
+        where_lang = lang
+    else:
+        languages = lang.split(',') 
+        if len(languages) == 1:
+            where_lang = f"AND movies.from_api.lang != '{languages[0]}'"
+        else:
+            where_lang = f"AND movies.from_api.lang NOT IN {tuple(lang.split(','))}"
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
@@ -190,7 +192,7 @@ def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
 
         WHERE movies.movie.imdb_rating >= {rating}
             AND movies.movie.min_age <= {min_age}
-            {excl_lang}
+            {where_lang}
             AND movies.movie.id NOT IN (
                 SELECT movie_id
                 FROM movies.movie_genre
