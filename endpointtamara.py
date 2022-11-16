@@ -165,6 +165,48 @@ def filter_include(rating, min_age, excl_genres, incl_groups, lang=''):
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result)
 
+def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
+    engine = get_connection()
+    if len(lang) == 0:
+        excl_lang = lang
+    elif len(lang) == 1:
+        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN ('{lang[0]}'))"
+    elif len(lang) > 1:
+        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN {tuple(lang)})"
+    query_text = f'''
+        SELECT movies.movie.id,
+            movies.movie.title, 
+            movies.from_api.poster,
+            movies.from_api.plot 
+        FROM
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_group})
+        ) one_genre
+
+        JOIN movies.from_api ON movies.from_api.movie_id = one_genre.id
+        JOIN movies.movie ON movies.movie.id = one_genre.id
+
+        WHERE movies.movie.imdb_rating >= {rating}
+            AND movies.movie.min_age <= {min_age}
+            {excl_lang}
+            AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id IN ({excl_genres})
+                )
+                
+        ORDER BY RAND() DESC
+        LIMIT 3;
+        '''
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(query_text)
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result)
+
 def get_genres():
     engine = get_connection()
     with engine.connect().execution_options(autocommit=True) as conn:

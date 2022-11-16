@@ -17,20 +17,6 @@ app = Flask(__name__)
 def posters():
     return endpointtamara.three_posters()
 
-class Film:
-    title = 'hoi'
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
-@app.route("/tweede/<tekst>")
-def hello_world2(tekst):
-    mijnfilm = Film()
-    mijnfilm.title = tekst
-    mijnfilm.poster = 'https://m.media-amazon.com/images/M/MV5BOTY4ZmZjY2YtODg4ZS00YjlkLWJhOWMtMDU4Y2YyYjMwMDEzXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_SX300.jpg'
-    mijnfilm.plot = 'After the time of the Mane 6, Sunny--a young Earth Pony--and her new Unicorn friend Izzy explore their world and strive to restore Harmony to Equestria'
-    return mijnfilm.toJSON()
-
 @app.route("/dorine/<tekst>")
 def select_movies(tekst):
     film = {"title": 'My Little Pony: A New Generation', "poster": 'https://m.media-amazon.com/images/M/MV5BOTY4ZmZjY2YtODg4ZS00YjlkLWJhOWMtMDU4Y2YyYjMwMDEzXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_SX300.jpg', "plot": tekst}
@@ -38,10 +24,12 @@ def select_movies(tekst):
     film3 = {"title":"Man Up", "poster":"https://m.media-amazon.com/images/M/MV5BMTk4MjU0OTQ3Nl5BMl5BanBnXkFtZTgwMDM0MDM1NTE@._V1_SX300.jpg", "plot":tekst}
     films = [film, film2, film3]
     result = json.dumps(films)
-    # print(result)
     return json.loads(result)
 
-select_movies('test')
+@app.route("/dorine/<rating>/<min_age>/<excl_genres>/<int:genre_group>/<lang>")
+@app.route("/dorine/<rating>/<min_age>/<excl_genres>/<int:genre_group>")
+def three_movies(rating, min_age, excl_genres, genre_group, lang=''):
+    return endpointtamara.filter_one_genre(rating, min_age, excl_genres, genre_group, lang)
 
 @app.route("/roelien")
 def test_roelien():
@@ -110,6 +98,10 @@ def get_filters(rating, min_age, excl_genres):
 def get_filtered(rating, min_age, excl_genres, incl_groups):
     return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups)
 
+@app.route("/filters/<rating>/<min_age>/<excl_genres>/<incl_groups>/<lang>")
+def filter_lang(rating, min_age, excl_genres, incl_groups, lang):
+    return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups, lang)
+
 @app.route('/filter_movies', methods=['POST', 'GET'])
 def filter_and_include():
     if request.method == 'POST':
@@ -123,7 +115,7 @@ def filter_and_include():
             return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups, lang)
         else:
             return endpointtamara.filter_online_db(rating, min_age, excl_genres)
-    return "POST 'rating', 'min_age' and 'excl_genres', optional 'incl_groups'."
+    return "POST 'rating', 'min_age' and 'excl_genres', optional 'incl_groups' and 'lang'."
 
 # @app.route("/checkfelix")
 # def functiefelix1():
