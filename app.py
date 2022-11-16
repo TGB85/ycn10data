@@ -85,6 +85,18 @@ def endpointerik5():
 def get_genre_list():
     return endpointtamara.get_genres()
 
+@app.route("/genre_groups")
+def genre_groups():
+    return endpointtamara.get_genre_group()
+
+@app.route("/languages")
+def list_languages():
+    return endpointtamara.get_languages()
+
+@app.route("/min_age")
+def age_categories():
+    return endpointtamara.get_min_age()
+
 @app.route("/endpointtamara/<int:genre_id>")
 def movies(genre_id):
     print(f"genre_id = {genre_id}")

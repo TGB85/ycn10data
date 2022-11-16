@@ -172,6 +172,32 @@ def get_genres():
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result)
 
+def get_languages():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('''
+        SELECT lang FROM movies.from_api
+        WHERE lang IS NOT NULL
+        GROUP BY lang
+        HAVING COUNT(*) > 10;'''))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result) 
+
+def get_min_age():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('SELECT DISTINCT min_age FROM movies.movie'))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result) 
+
+def get_genre_group():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('SELECT DISTINCT group_id, group_text FROM movies.genre WHERE group_id IS NOT NULL'))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result) 
+
+
 if __name__ == '__main__':
     try:
         engine = get_connection()
