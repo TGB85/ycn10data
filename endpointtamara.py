@@ -24,8 +24,7 @@ sql_url = {'drivername': "mysql+mysqlconnector",
 def get_connection():
     # return create_engine('mysql+mysqlconnector://%s:%s@yc2210netflixdbpython.mysql.database.azure.com/movies' %(quote(user), quote(pwd)),
 	# 		connect_args=ssl_args, encoding='utf-8-sig')
-    return create_engine(URL.create(**sql_url), encoding='utf-8-sig')     
-            
+    return create_engine(URL.create(**sql_url), encoding='utf-8-sig')            
 
 def make_query(genre):
     return f'''
@@ -60,8 +59,16 @@ def three_posters():
     posters = [item for item in selection.poster]
     return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
 
-def filter_online_db(rating, min_age, excl_genres):
+def filter_online_db(rating, min_age, excl_genres, lang=""):
     engine = get_connection()
+    if len(lang) == 0:
+        excl_lang = lang
+    else:
+        languages = lang.split(',') 
+        if len(languages) == 1:
+            excl_lang = f"AND movies.from_api.lang != '{languages[0]}'"
+        else:
+            excl_lang = f"AND movies.from_api.lang NOT IN {tuple(languages)}"
     query_text = f'''
     SELECT movies.movie.id,
         movies.movie.title, 
@@ -72,6 +79,7 @@ def filter_online_db(rating, min_age, excl_genres):
             ON movies.from_api.movie_id = movies.movie.id
         WHERE movies.movie.imdb_rating >= {rating}
             AND movies.movie.min_age <= {min_age}
+            {excl_lang}
             AND movies.movie.id NOT IN (
                 SELECT movie_id
                 FROM movies.movie_genre
@@ -86,15 +94,17 @@ def filter_online_db(rating, min_age, excl_genres):
     json_obj = data.sample(n=3).to_json(orient = "records")
     return json.loads(json_obj)
 
-def filter_include(rating, min_age, excl_genres, incl_groups, lang=''):
+def filter_include(rating, min_age, excl_genres, incl_groups, lang=""):
     engine = get_connection()
     genre_1, genre_2, genre_3 = incl_groups.split(',')
     if len(lang) == 0:
         excl_lang = lang
-    elif len(lang) == 1:
-        excl_lang = f"AND movies.from_api.lang != '{lang[0]}')"
-    elif len(lang) > 1:
-        excl_lang = f"AND movies.from_api.lang NOT IN {tuple(lang)}"
+    else:
+        languages = lang.split(',') 
+        if len(languages) == 1:
+            excl_lang = f"AND movies.from_api.lang != '{languages[0]}'"
+        else:
+            excl_lang = f"AND movies.from_api.lang NOT IN {tuple(languages)}"
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
@@ -174,7 +184,7 @@ def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
         if len(languages) == 1:
             where_lang = f"AND movies.from_api.lang != '{languages[0]}'"
         else:
-            where_lang = f"AND movies.from_api.lang NOT IN {tuple(lang.split(','))}"
+            where_lang = f"AND movies.from_api.lang NOT IN {tuple(languages)}"
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
@@ -241,7 +251,6 @@ def get_genre_group():
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result) 
 
-
 if __name__ == '__main__':
     try:
         engine = get_connection()
@@ -252,7 +261,9 @@ if __name__ == '__main__':
     # print(three_movies_per_genre(genre_id=1))
     # print(three_posters())
     # print(filter_online_db(5.0,  14, '9,0'))
+    # print(filter_online_db(5.0,  14, '9,0', "South_Asian"))
+    # print(filter_online_db(5.0,  14, '9,0', "South_Asian,East_Asian"))
     # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7'))
-    # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7', lang=['East_Asian']))
-    # print(filter_include(rating=5.0, min_age=18, excl_genres='9', incl_groups='0,4,7', lang=['East_Asian', 'South_Asian']))
+    # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7', lang="East_Asian"))
+    # print(filter_include(rating=5.0, min_age=18, excl_genres='9', incl_groups='0,4,7', lang="East_Asian,South_Asian"))
     # print(get_genres())
