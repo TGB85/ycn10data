@@ -86,7 +86,7 @@ def filter_online_db(rating, min_age, excl_genres):
     json_obj = data.sample(n=3).to_json(orient = "records")
     return json.loads(json_obj)
 
-def filter_include(rating, min_age, excl_genres, incl_groups, lang=''):
+def filter_include(rating, min_age, excl_genres, incl_groups, lang=""):
     engine = get_connection()
     genre_1, genre_2, genre_3 = incl_groups.split(',')
     if len(lang) == 0:
@@ -174,7 +174,7 @@ def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
         if len(languages) == 1:
             where_lang = f"AND movies.from_api.lang != '{languages[0]}'"
         else:
-            where_lang = f"AND movies.from_api.lang NOT IN {tuple(lang.split(','))}"
+            where_lang = f"AND movies.from_api.lang NOT IN {tuple(languages)}"
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
@@ -208,6 +208,88 @@ def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
         query = conn.execute(query_text)
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result)
+
+def filter_languages(rating, min_age, excl_genres, incl_groups, lang):
+    genre_1, genre_2, genre_3 = incl_groups.split(',')
+    engine = get_connection()
+    if len(lang) == 0:
+        where_lang = lang
+    else:
+        languages = lang.split(',') 
+        if len(languages) == 1:
+            where_lang = f"AND movies.from_api.lang != '{languages[0]}'"
+        else:
+            where_lang = f"AND movies.from_api.lang NOT IN {tuple(languages)}"
+    query_text = f'''
+        SELECT movies.movie.id,
+            movies.movie.title, 
+            movies.from_api.poster,
+            movies.from_api.plot 
+        FROM
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_1})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_2})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                            JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                            WHERE group_id = {genre_3})
+            UNION
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_1})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_2})
+            ORDER BY RAND() DESC
+            LIMIT 10)
+            UNION
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id	
+                                        WHERE group_id = {genre_1})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_3})
+            ORDER BY RAND() DESC
+            LIMIT 10)
+            UNION
+            (SELECT movies.movie.id FROM movies.movie
+                WHERE movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_2})
+                    AND movies.movie.id IN (SELECT movie_id FROM movies.movie_genre JOIN movies.movie ON movies.movie_genre.movie_id = movies.movie.id 
+                                        JOIN movies.genre ON movies.movie_genre.genre_id = movies.genre.id
+                                        WHERE group_id = {genre_3})
+            ORDER BY RAND() DESC
+            LIMIT 10)
+            ) three_genres
+
+        JOIN movies.from_api ON movies.from_api.movie_id = three_genres.id
+        JOIN movies.movie ON movies.movie.id = three_genres.id
+
+        WHERE movies.movie.imdb_rating >= {rating}
+            AND movies.movie.min_age <= {min_age}
+            {where_lang}
+            AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id IN ({excl_genres})
+                )
+                
+        ORDER BY RAND() DESC
+        LIMIT 3;
+        '''
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(query_text)
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result)
+
 
 def get_genres():
     engine = get_connection()
