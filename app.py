@@ -100,7 +100,7 @@ def get_filtered(rating, min_age, excl_genres, incl_groups):
 
 @app.route("/filters/<rating>/<min_age>/<excl_genres>/<incl_groups>/<lang>")
 def filter_lang(rating, min_age, excl_genres, incl_groups, lang):
-    return endpointtamara.filter_languages(rating, min_age, excl_genres, incl_groups, lang)
+    return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups, lang)
 
 @app.route('/filter_movies', methods=['POST', 'GET'])
 def filter_and_include():
@@ -114,7 +114,7 @@ def filter_and_include():
             incl_groups = data['incl_groups']
             return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups, lang)
         else:
-            return endpointtamara.filter_online_db(rating, min_age, excl_genres)
+            return endpointtamara.filter_online_db(rating, min_age, excl_genres, lang)
     return "POST 'rating', 'min_age' and 'excl_genres', optional 'incl_groups' and 'lang'."
 
 # @app.route("/checkfelix")
