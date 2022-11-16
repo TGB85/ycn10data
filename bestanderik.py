@@ -148,7 +148,5 @@ if __name__ == '__main__':
     #print(a)
     #b = drie_recepten({"vegetarisch":1})
     #print(b)
-    #c1, c2, c3 = soort_recept_opties(), keuken1_opties(), keuken2_opties()
-    #print({**c1,**c2,**c3})
     d = beschikbare_filters()
     print(d)
