@@ -77,6 +77,10 @@ def endpointerik4():
 def endpointerik5():
     return bestanderik.random_recept()
 
+@app.route("/filters_recepten")
+def endpointerik6():
+    return bestanderik.beschikbare_filters()
+
 # @app.route("/crypto")
 # def endpoint_crypto():
 #     return scrappen.return_database()

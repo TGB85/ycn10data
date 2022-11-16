@@ -91,11 +91,18 @@ def recepten(filters):
         return json.dumps("no recipes found, search to narrow")
     ids = list(df1['id'])
     in_part = make_in(ids)
-    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN ({in_part}) ')
+    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN {in_part} ')
     res = pd.merge(df1,df2,on='id')
     return res.to_json(orient="records")
 
 def drie_recepten(filters):
+    if len(filters)==0:
+        df1 = query_sql(f'SELECT * FROM `recepten`.`recepten` ORDER BY RAND() LIMIT 3')
+        ids = list(df1['id'])
+        in_part = make_in(ids)
+        df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN {in_part} ')
+        res = pd.merge(df1,df2,on='id')
+        return res.to_json(orient="records")
     w = make_where(filters)
     df1 = query_sql(f'SELECT * FROM `recepten`.`recepten` WHERE {w} ORDER BY RAND() LIMIT 3')
     if df1.empty:
@@ -103,12 +110,45 @@ def drie_recepten(filters):
         return json.dumps("no recipes found, search to narrow")
     ids = list(df1['id'])
     in_part = make_in(ids)
-    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN ({in_part}) ')
+    df2 = query_sql(f'SELECT * FROM `recepten`.`recepten_details` WHERE id IN {in_part} ')
     res = pd.merge(df1,df2,on='id')
     return res.to_json(orient="records")
+
+def soort_recept_opties():
+    df = query_sql(f'SELECT DISTINCT soort_recept FROM `recepten`.`recepten`')
+    lst = list(df['soort_recept'])
+    lst.remove(None)
+    dic = {'soort_recept':lst}
+    return dic
+
+def keuken1_opties():
+    df = query_sql(f'SELECT DISTINCT keuken1 FROM `recepten`.`recepten`')
+    lst = list(df['keuken1'])
+    lst.remove(None)
+    dic = {'keuken1':lst}
+    return dic
+
+def keuken2_opties():
+    df = query_sql(f'SELECT DISTINCT keuken2 FROM `recepten`.`recepten`')
+    lst = list(df['keuken2'])
+    lst.remove(None)
+    dic = {'keuken2':lst}
+    return dic
+
+def beschikbare_filters():
+    b = [0,1]
+    dic1 = {"glutenvrij":b,"vegetarisch":b,"lactosevrij":b,"veganistisch":b,"zonder_vlees_vis":b,"kerst":b,"bbq":b,
+    "lente":b,"zomer":b,"herfst":b,"winter":b}
+    dic2, dic3, dic4 = soort_recept_opties(), keuken1_opties(), keuken2_opties()
+    res = {**dic1,**dic2,**dic3,**dic4}
+    return json.dumps(res)
 
 if __name__ == '__main__':
     #a = random_recept()
     #print(a)
-    b = recepten({"vegetarisch":1,'zomer':1,'keuken1':'amerikaans'})
-    print(b)
+    #b = drie_recepten({"vegetarisch":1})
+    #print(b)
+    #c1, c2, c3 = soort_recept_opties(), keuken1_opties(), keuken2_opties()
+    #print({**c1,**c2,**c3})
+    d = beschikbare_filters()
+    print(d)
