@@ -81,6 +81,10 @@ def endpointerik5():
 # def endpoint_crypto():
 #     return scrappen.return_database()
 
+@app.route("/genres")
+def get_genre_list():
+    return endpointtamara.get_genres()
+
 @app.route("/endpointtamara/<int:genre_id>")
 def movies(genre_id):
     print(f"genre_id = {genre_id}")

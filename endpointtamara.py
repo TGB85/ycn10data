@@ -165,6 +165,13 @@ def filter_include(rating, min_age, excl_genres, incl_groups, lang=''):
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result)
 
+def get_genres():
+    engine = get_connection()
+    with engine.connect().execution_options(autocommit=True) as conn:
+        query = conn.execute(text('SELECT id, genre_text FROM movies.genre'))
+    result = json.dumps([(dict(row._mapping.items())) for row in query])
+    return json.loads(result)
+
 if __name__ == '__main__':
     try:
         engine = get_connection()
@@ -178,3 +185,4 @@ if __name__ == '__main__':
     # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7'))
     # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7', lang=['East_Asian']))
     # print(filter_include(rating=5.0, min_age=18, excl_genres='9', incl_groups='0,4,7', lang=['East_Asian', 'South_Asian']))
+    # print(get_genres())
