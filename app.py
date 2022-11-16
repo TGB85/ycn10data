@@ -33,12 +33,12 @@ def hello_world2(tekst):
 
 @app.route("/dorine/<tekst>")
 def select_movies(tekst):
-    film = {"tekst": tekst, "title": 'My Little Pony: A New Generation', "poster": 'https://m.media-amazon.com/images/M/MV5BOTY4ZmZjY2YtODg4ZS00YjlkLWJhOWMtMDU4Y2YyYjMwMDEzXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_SX300.jpg', "plot": 'After the time of the Mane 6, Sunny--a young Earth Pony--and her new Unicorn friend Izzy explore their world and strive to restore Harmony to Equestria.'}
-    film2 = {'tekst': tekst, "title":"Strictly Ballroom", "poster":"https://m.media-amazon.com/images/M/MV5BNjY2MWI2YWYtOGUyZS00ZGZjLTkyYjAtYWYxZDJmMzlkZjE0XkEyXkFqcGdeQXVyNTE1NjY5Mg@@._V1_SX300.jpg", "plot":"A maverick dancer risks his career by performing an unusual routine and sets out to succeed with a new partner."}
-    film3 = {'tekst': tekst, "title":"Man Up", "poster":"https://m.media-amazon.com/images/M/MV5BMTk4MjU0OTQ3Nl5BMl5BanBnXkFtZTgwMDM0MDM1NTE@._V1_SX300.jpg", "plot":"Martin, a 19-year-old slacker, has his life turned upside down when he gets his Mormon girlfriend pregnant, so he moves in with his stoner best friend Randall, who teaches him to be a man."}
+    film = {"title": 'My Little Pony: A New Generation', "poster": 'https://m.media-amazon.com/images/M/MV5BOTY4ZmZjY2YtODg4ZS00YjlkLWJhOWMtMDU4Y2YyYjMwMDEzXkEyXkFqcGdeQXVyMTEzMTI1Mjk3._V1_SX300.jpg', "plot": tekst}
+    film2 = {"title":"Strictly Ballroom", "poster":"https://m.media-amazon.com/images/M/MV5BNjY2MWI2YWYtOGUyZS00ZGZjLTkyYjAtYWYxZDJmMzlkZjE0XkEyXkFqcGdeQXVyNTE1NjY5Mg@@._V1_SX300.jpg", "plot":tekst}
+    film3 = {"title":"Man Up", "poster":"https://m.media-amazon.com/images/M/MV5BMTk4MjU0OTQ3Nl5BMl5BanBnXkFtZTgwMDM0MDM1NTE@._V1_SX300.jpg", "plot":tekst}
     films = [film, film2, film3]
     result = json.dumps(films)
-    print(result)
+    # print(result)
     return json.loads(result)
 
 select_movies('test')
@@ -101,9 +101,10 @@ def filter_and_include():
         rating = data['rating']
         min_age = data['min_age']
         excl_genres = data['excl_genres'] 
+        lang = data.get('lang')
         if 'incl_groups' in data.keys():
             incl_groups = data['incl_groups']
-            return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups)
+            return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups, lang)
         else:
             return endpointtamara.filter_online_db(rating, min_age, excl_genres)
     return "POST 'rating', 'min_age' and 'excl_genres', optional 'incl_groups'."
