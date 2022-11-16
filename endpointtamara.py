@@ -92,9 +92,9 @@ def filter_include(rating, min_age, excl_genres, incl_groups, lang=''):
     if len(lang) == 0:
         excl_lang = lang
     elif len(lang) == 1:
-        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN ('{lang[0]}'))"
+        excl_lang = f"AND movies.from_api.lang != '{lang[0]}')"
     elif len(lang) > 1:
-        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN {tuple(lang)})"
+        excl_lang = f"AND movies.from_api.lang NOT IN {tuple(lang)}"
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
@@ -170,9 +170,9 @@ def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
     if len(lang) == 0:
         excl_lang = lang
     elif len(lang) == 1:
-        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN ('{lang[0]}'))"
+        excl_lang = f"AND movies.from_api.lang != '{lang[0]}')"
     elif len(lang) > 1:
-        excl_lang = f"AND movies.movie.id IN (SELECT movie_id FROM movies.from_api WHERE movies.from_api.lang NOT IN {tuple(lang)})"
+        excl_lang = f"AND movies.from_api.lang NOT IN {tuple(lang)}"
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
