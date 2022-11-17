@@ -345,13 +345,3 @@ if __name__ == '__main__':
         print(f"Connection created.")
     except Exception as er_msg:
         print("Connection failed due to error: \n", er_msg)
-    
-    # print(three_movies_per_genre(genre_id=1))
-    # print(three_posters())
-    # print(filter_online_db(5.0,  14, '9,0'))
-    # print(filter_online_db(5.0,  14, '9,0', "South_Asian"))
-    # print(filter_online_db(5.0,  14, '9,0', "South_Asian,East_Asian"))
-    # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7'))
-    # print(filter_include(rating=7.0, min_age=14, excl_genres='9', incl_groups='0,4,7', lang="East_Asian"))
-    # print(filter_include(rating=5.0, min_age=18, excl_genres='9', incl_groups='0,4,7', lang="East_Asian,South_Asian"))
-    # print(get_genres())
