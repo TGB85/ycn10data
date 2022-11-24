@@ -59,20 +59,33 @@ def three_posters():
     posters = [item for item in selection.poster]
     return f"<img src={posters[0]}><img src={posters[1]}><img src={posters[2]}>"
 
-def filter_online_db(rating, min_age, excl_genres, lang=""):
+def filter_online_db(rating, min_age, excl_genres, lang):
     engine = get_connection()
-    # excl_genres
-    if len(excl_genres) == 1:
-        ex_genres = f"({excl_genres[0]})"
-    else:
-        ex_genres = tuple(excl_genres)
-    # languages
     if len(lang) == 0:
-        excl_lang = lang
+        excl_lang = ""
     elif len(lang) == 1:
         excl_lang = f"AND movies.from_api.lang != '{lang[0]}'"
-    else:
+    elif len(lang) > 1:
         excl_lang = f"AND movies.from_api.lang NOT IN {tuple(lang)}"
+    print(lang)
+    if len(excl_genres) == 0:
+        ex_genres = ""
+    elif len(excl_genres) == 1:
+        ex_genres = f'''AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id = {excl_genres[0]}
+                )'''
+    elif len(excl_genres) > 1:
+        ex_genres = f'''AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id IN {tuple(excl_genres)}
+                )'''
     query_text = f'''
     SELECT movies.movie.id,
         movies.movie.title, 
@@ -84,18 +97,13 @@ def filter_online_db(rating, min_age, excl_genres, lang=""):
         WHERE movies.movie.imdb_rating >= {rating}
             AND movies.movie.min_age <= {min_age}
             {excl_lang}
-            AND movies.movie.id NOT IN (
-                SELECT movie_id
-                FROM movies.movie_genre
-                JOIN movies.movie
-                    ON movies.movie_genre.movie_id = movies.movie.id
-                WHERE genre_id IN {ex_genres}
-                );
+            {ex_genres};
     '''
     with engine.connect().execution_options(autocommit=True) as conn:
         query = conn.execute(query_text)
     data = pd.DataFrame(query.fetchall())
-    json_obj = data.sample(n=3).to_json(orient = "records")
+    # json_obj = data.sample(n=3).to_json(orient = "records")
+    json_obj = data.to_json(orient = "records")
     return json.loads(json_obj)
 
 def filter_include(rating, min_age, excl_genres, incl_groups, lang=""):
@@ -179,7 +187,7 @@ def filter_include(rating, min_age, excl_genres, incl_groups, lang=""):
     result = json.dumps([(dict(row._mapping.items())) for row in query])
     return json.loads(result)
 
-def filter_one_genre(rating, min_age, excl_genres, genre_group, lang=''):
+def filter_one_genre(rating, min_age, excl_genres, genre_group, lang):
     engine = get_connection()
     if len(lang) == 0:
         where_lang = lang
@@ -257,18 +265,30 @@ def get_genre_group():
 
 def filter_include_arrays(rating, min_age, excl_genres, incl_groups, lang=""):
     engine = get_connection()
-    if len(excl_genres) == 1:
-        ex_genres = f"({excl_genres[0]})"
-    else:
-        ex_genres = tuple(excl_genres)
-    print(ex_genres)
+    if len(excl_genres) == 0:
+        ex_genres = ""
+    elif len(excl_genres) == 1:
+        ex_genres = f'''AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id = {excl_genres[0]}
+                )'''
+    elif len(excl_genres) > 1:
+        ex_genres = f'''AND movies.movie.id NOT IN (
+                SELECT movie_id
+                FROM movies.movie_genre
+                JOIN movies.movie
+                    ON movies.movie_genre.movie_id = movies.movie.id
+                WHERE genre_id IN {tuple(excl_genres)}
+                )'''
     if len(lang) == 0:
-        excl_lang = lang
+        excl_lang = ""
     elif len(lang) == 1:
         excl_lang = f"AND movies.from_api.lang != '{lang[0]}'"
-    else:
+    elif len(lang) > 1:
         excl_lang = f"AND movies.from_api.lang NOT IN {tuple(lang)}"
-    # print(excl_lang)
     query_text = f'''
         SELECT movies.movie.id,
             movies.movie.title, 
@@ -323,13 +343,7 @@ def filter_include_arrays(rating, min_age, excl_genres, incl_groups, lang=""):
         WHERE movies.movie.imdb_rating >= {rating}
             AND movies.movie.min_age <= {min_age}
             {excl_lang}
-            AND movies.movie.id NOT IN (
-                SELECT movie_id
-                FROM movies.movie_genre
-                JOIN movies.movie
-                    ON movies.movie_genre.movie_id = movies.movie.id
-                WHERE genre_id IN {ex_genres}
-                )
+            {ex_genres}
                 
         ORDER BY RAND() DESC
         LIMIT 3;
@@ -345,3 +359,6 @@ if __name__ == '__main__':
         print(f"Connection created.")
     except Exception as er_msg:
         print("Connection failed due to error: \n", er_msg)
+    # print(filter_include_arrays(rating=5, min_age=14, excl_genres=[9], incl_groups=[0,4,7]))
+    # print(filter_include_arrays(rating=5, min_age=14, excl_genres=[9,1], incl_groups=[0,4,7]))
+    # print(filter_include_arrays(rating=5, min_age=14, excl_genres=[9,1], incl_groups=[0,4,7], lang=['South_Asian']))
