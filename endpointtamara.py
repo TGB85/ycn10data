@@ -102,8 +102,7 @@ def filter_online_db(rating, min_age, excl_genres, lang):
     with engine.connect().execution_options(autocommit=True) as conn:
         query = conn.execute(query_text)
     data = pd.DataFrame(query.fetchall())
-    # json_obj = data.sample(n=3).to_json(orient = "records")
-    json_obj = data.to_json(orient = "records")
+    json_obj = data.sample(n=3).to_json(orient = "records")
     return json.loads(json_obj)
 
 def filter_include(rating, min_age, excl_genres, incl_groups, lang=""):
