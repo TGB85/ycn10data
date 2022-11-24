@@ -96,11 +96,11 @@ def movies(genre_id):
 
 @app.route("/filters/<rating>/<min_age>/<excl_genres>")
 def get_filters(rating, min_age, excl_genres):
-        return endpointtamara.filter_online_db(rating, min_age, excl_genres)
+        return endpointtamara.filter_online_db(rating, min_age, excl_genres, lang="")
 
 @app.route("/filters/<rating>/<min_age>/<excl_genres>/<incl_groups>")
 def get_filtered(rating, min_age, excl_genres, incl_groups):
-    return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups)
+    return endpointtamara.filter_include(rating, min_age, excl_genres, incl_groups, lang="")
 
 @app.route("/filters/<rating>/<min_age>/<excl_genres>/<incl_groups>/<lang>")
 def filter_lang(rating, min_age, excl_genres, incl_groups, lang):
