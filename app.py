@@ -106,16 +106,16 @@ def filter_lang(rating, min_age, excl_genres, incl_groups, lang):
 def filter_and_include():
     if request.method == 'POST':
         data = json.loads(request.data)
-        rating = data['rating']
-        min_age = data['min_age']
-        excl_genres = data['excl_genres'] 
+        rating = data.get('rating', 0)
+        min_age = data.get('min_age', 14)
+        excl_genres = data.get('excl_genres', "")
         lang = data.get('lang', "")
         if 'incl_groups' in data.keys():
             incl_groups = data['incl_groups']
             return endpointtamara.filter_include_arrays(rating, min_age, excl_genres, incl_groups, lang)
         else:
             return endpointtamara.filter_online_db(rating, min_age, excl_genres, lang)
-    return "POST 'rating', 'min_age' and 'excl_genres', optional 'incl_groups' and 'lang'."
+    return "POST 'rating', 'min_age' and 'excl_genres', 'incl_groups' and 'lang'."
 
 # @app.route("/checkfelix")
 # def functiefelix1():
